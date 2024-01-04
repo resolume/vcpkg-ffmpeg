@@ -6,7 +6,7 @@ This repository contains the vcpkg port for FFmpeg, which is modified to include
 
 `master` branch contains the latest version that might still be in internal development
 
-date tags rever to the version from vcpkg that was pulled and modified, version number tags report the first version of Resolume to include this version of FFmpeg. 
+date tags refer to the version from vcpkg that was pulled and modified, version number tags report the first version of Resolume to include this version of FFmpeg.
 This does not update with every release of the Resolume software.
 
 ### Superseeded repositories
@@ -26,8 +26,8 @@ As we use a custom modified version of FFmpeg, we need to upgrade this port manu
 git subtree split -P ports/ffmpeg -b ffmpeg-port
 
 # checkout our public registry
-git clone https://github.com/resolume/vcpkg-public-registry.git
-cd vcpkg-public-registry
+git clone https://github.com/resolume/vcpkg-ffmpeg.git
+cd vcpkg-ffmpeg
 
 # assuming our modifications on ffmpeg are latest commit on master
 git checkout -B ffmpeg-port master^1
@@ -46,7 +46,7 @@ git rev-parse HEAD:ports/ffmpeg
 
 # Then commit these changes
 git commit --amend --no-edit versions
-git remote add forpr git@github.com/sandercox/vcpkg-public-registry.git
+git remote add forpr git@github.com/sandercox/vcpkg-ffmpeg.git
 git push forpr ffmpeg-update
 
 # Head over to github to start a PR with these changes

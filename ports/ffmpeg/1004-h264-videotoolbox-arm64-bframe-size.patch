@@ -1,0 +1,17 @@
+diff --git a/libavcodec/videotoolboxenc.c b/libavcodec/videotoolboxenc.c
+index b0e827d14a..fdd6a871f8 100644
+--- a/libavcodec/videotoolboxenc.c
++++ b/libavcodec/videotoolboxenc.c
+@@ -1738,7 +1738,11 @@ static av_cold int vtenc_init(AVCodecContext *avctx)
+         //Some devices don't output B-frames for main profile, even if requested.
+         // HEVC has b-pyramid
+         if (CFBooleanGetValue(has_b_frames_cfbool))
+-            vtctx->has_b_frames = avctx->codec_id == AV_CODEC_ID_HEVC ? 2 : 1;
++#ifdef __aarch64__
++        vtctx->has_b_frames = (avctx->codec_id == AV_CODEC_ID_HEVC || avctx->codec_id == AV_CODEC_ID_H264) ? 2 : 1;
++#else
++        vtctx->has_b_frames = avctx->codec_id == AV_CODEC_ID_HEVC ? 2 : 1;
++#endif
+         else
+             vtctx->has_b_frames = 0;
+         CFRelease(has_b_frames_cfbool);

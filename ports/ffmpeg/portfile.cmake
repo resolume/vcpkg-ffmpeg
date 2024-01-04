@@ -17,6 +17,12 @@ vcpkg_from_github(
         0040-ffmpeg-add-av_stream_get_first_dts-for-chromium.patch # Do not remove this patch. It is required by chromium
         0041-add-const-for-opengl-definition.patch
         0043-fix-miss-head.patch
+
+        # Resolume patches
+        1000-resolume-small-memory-allocations.patch
+        1001-max_chunk_size-from-format-context-in-build_chunks.patch
+        1003-avformat_index_get_entry_const_correctness.patch
+        1004-h264-videotoolbox-arm64-bframe-size.patch
 )
 
 if(SOURCE_PATH MATCHES " ")
@@ -54,6 +60,8 @@ elseif(VCPKG_CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 if(VCPKG_TARGET_IS_OSX)
+    # we want our libs with @rpath for development
+    string(APPEND OPTIONS " --install_name_dir=@rpath")
     list(JOIN VCPKG_OSX_ARCHITECTURES " " OSX_ARCHS)
     list(LENGTH VCPKG_OSX_ARCHITECTURES OSX_ARCH_COUNT)
 endif()
@@ -1007,3 +1015,6 @@ you may need to add the following link option for your library:
 endif()
 
 vcpkg_install_copyright(FILE_LIST "${SOURCE_PATH}/${LICENSE_FILE}")
+
+# Disable fixup of rpaths by vcpkg
+set(VCPKG_FIXUP_MACHO_RPATH OFF)
