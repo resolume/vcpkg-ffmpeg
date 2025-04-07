@@ -24,6 +24,7 @@ vcpkg_from_github(
         1000-resolume-small-memory-allocations.patch
         1001-max_chunk_size-from-format-context-in-build_chunks.patch
         1003-avformat_index_get_entry_const_correctness.patch
+        1004-h264-videotoolbox-arm64-bframe-size.patch
 )
 
 if(SOURCE_PATH MATCHES " ")
