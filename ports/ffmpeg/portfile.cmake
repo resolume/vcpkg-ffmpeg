@@ -286,6 +286,38 @@ else()
     set(OPTIONS "${OPTIONS} --disable-amf")
 endif()
 
+if("vaapi" IN_LIST FEATURES)
+    # VAAPI links against the system libva (it is not a vcpkg dependency). Detect it
+    # up front so a missing libva-dev produces a clear, actionable error rather than
+    # a cryptic failure deep inside ffmpeg's own configure (we use --disable-autodetect,
+    # so --enable-vaapi is a hard requirement).
+    set(VAAPI_AVAILABLE OFF)
+    find_program(VAAPI_PKG_CONFIG NAMES pkg-config)
+    if(VAAPI_PKG_CONFIG)
+        execute_process(COMMAND "${VAAPI_PKG_CONFIG}" --exists "libva >= 1.1.0" "libva-drm" RESULT_VARIABLE VAAPI_PKGCONFIG_RESULT)
+        if(VAAPI_PKGCONFIG_RESULT EQUAL 0)
+            set(VAAPI_AVAILABLE ON)
+        endif()
+    endif()
+    if(NOT VAAPI_AVAILABLE)
+        # Fall back to a direct header check in case pkg-config is unavailable.
+        find_path(VAAPI_INCLUDE_DIR NAMES va/va.h PATHS /usr/include /usr/local/include)
+        if(VAAPI_INCLUDE_DIR)
+            set(VAAPI_AVAILABLE ON)
+        endif()
+    endif()
+    if(NOT VAAPI_AVAILABLE)
+        message(FATAL_ERROR
+            "ffmpeg[vaapi] requires the system VA-API development files (libva), which were not found.\n"
+            "Install them and re-run, e.g. on Debian/Ubuntu:\n"
+            "    sudo apt install libva-dev\n"
+            "or remove the 'vaapi' feature from the ffmpeg dependency.")
+    endif()
+    set(OPTIONS "${OPTIONS} --enable-vaapi")
+else()
+    set(OPTIONS "${OPTIONS} --disable-vaapi")
+endif()
+
 if("aom" IN_LIST FEATURES)
     set(OPTIONS "${OPTIONS} --enable-libaom")
     set(WITH_AOM ON)
