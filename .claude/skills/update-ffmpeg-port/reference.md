@@ -19,7 +19,7 @@ it as the last merge on the first-parent chain, which is the same commit.
 
 ## The resolume delta
 
-### `ports/ffmpeg/portfile.cmake` - three hunks, nothing else
+### `ports/ffmpeg/portfile.cmake` - four hunks, nothing else
 
 1. The resolume patches, appended to the `PATCHES` list of `vcpkg_from_github`,
    after upstream's, separated by a blank line:
@@ -46,11 +46,19 @@ it as the last merge on the first-parent chain, which is the same commit.
    set(VCPKG_FIXUP_MACHO_RPATH OFF)
    ```
 
+4. At the top of upstream's `if ("vaapi" IN_LIST FEATURES)` block, before its
+   `--enable-vaapi`: the pkg-config probe for the system `libva` + `libva-drm`
+   that fails with an `apt install libva-dev` hint. VAAPI must use the system
+   libva: a vcpkg-built one looks for drivers in its own build tree, so every
+   VAAPI open fails at runtime.
+
 ### `ports/ffmpeg/vcpkg.json` - version fields only
 
 `version` is upstream's, `port-version` is upstream's + 100 (upstream `1` -> 101,
-upstream `2` -> 102). Nothing else in this file is ours - not a key, not a line
-break. `finish-update.sh` rewrites exactly these two lines.
+upstream `2` -> 102). The only other line that is ours is the `vaapi` feature:
+it has no `dependencies` (upstream's depends on the vcpkg `libva` port) and its
+description says it uses the system libva. Keep that when taking upstream's
+manifest. `finish-update.sh` rewrites only the two version lines.
 
 ### The patches themselves
 
@@ -102,7 +110,8 @@ The 2026.07.29 round is the worked example: `ffmpeg: add vaapi feature` and
 `ffmpeg: support GNU-driver clang targeting windows-msvc` both went that way -
 upstream took the clang work as vcpkg #52810 and ffmpeg 8.1.2 took the configure
 half, while upstream's own `vaapi` feature (which depends on the vcpkg `libva`
-port) replaced ours (which probed for system libva).
+port) replaced ours (which probed for system libva). That replacement broke
+VAAPI at runtime (see hunk 4), so the system-libva variant was restored on top.
 
 Commits on `master` that are not part of the port delta (this skill, README
 edits) get replayed along with the resolume commit. That is harmless - vcpkg

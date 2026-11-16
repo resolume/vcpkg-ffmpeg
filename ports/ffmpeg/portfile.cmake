@@ -606,6 +606,19 @@ else()
 endif()
 
 if ("vaapi" IN_LIST FEATURES)
+    # VAAPI uses the system libva: its drivers come from the distribution and are found through the
+    # system libva's driver path, which a vcpkg-built libva points at its own build tree instead.
+    find_program(VAAPI_PKG_CONFIG NAMES pkg-config)
+    if(VAAPI_PKG_CONFIG)
+        execute_process(COMMAND "${VAAPI_PKG_CONFIG}" --exists "libva >= 1.1.0" "libva-drm" RESULT_VARIABLE VAAPI_PKGCONFIG_RESULT)
+    endif()
+    if(NOT VAAPI_PKG_CONFIG OR NOT VAAPI_PKGCONFIG_RESULT EQUAL 0)
+        message(FATAL_ERROR
+            "ffmpeg[vaapi] requires the system VA-API development files (libva, libva-drm), which were not found.\n"
+            "Install them and re-run, e.g. on Debian/Ubuntu:\n"
+            "    sudo apt install libva-dev\n"
+            "or remove the 'vaapi' feature from the ffmpeg dependency.")
+    endif()
     set(OPTIONS "${OPTIONS} --enable-vaapi")
     set(WITH_VAAPI ON)
 else()
